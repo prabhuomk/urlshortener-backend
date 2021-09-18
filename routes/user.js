@@ -144,9 +144,10 @@ router
 router.route("/urlshorter").post(async (request,response)=>{
     const {longUrl}=request.body;
     const shortUrl= await generateUrl();
+    const count=0;
     const time= new Date();
     const client=await createConnection();
-    const urlStoreage= await insertUrls(client,{longUrl:longUrl,shortUrl:shortUrl,timestamp:time});
+    const urlStoreage= await insertUrls(client,{longUrl:longUrl,shortUrl:shortUrl,timestamp:time,ClickCount:count});
     response.send({message:"created",shortUrl});
 
 });
