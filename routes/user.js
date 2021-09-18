@@ -28,7 +28,7 @@ router
     const link = `${process.env.BASE_URL}/account-activation/${email_id}/${token}`;
     const mail=  await sendEmail(email_id, "Account Activation", link);
     console.log(hashedPassword,pass);
-    response.send(pass);
+    response.send({message:"account activation link is send to your mail id"});
     
 });
 
