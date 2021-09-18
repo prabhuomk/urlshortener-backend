@@ -52,7 +52,7 @@ router
 
     } 
     else{
-        response.send({message:"link got expired"})
+        response.send({message:"link got expired,try to sign up again"})
     }
 
 } 
