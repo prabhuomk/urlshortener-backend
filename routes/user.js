@@ -19,6 +19,8 @@ router
     
     const { email_id,firstname,lastname,password }= request.body;
     const client=await createConnection();
+    const myUser= await getUser(client,{email_id:email_id});
+    if(!myuser){
     const hashedPassword=await genPassword(password);
     const isActive="false"
     const pass=await insertUser(client,{email_id:email_id,firstname:firstname,lastname:lastname,password:hashedPassword,Account_Active:isActive})
@@ -29,6 +31,11 @@ router
     const mail=  await sendEmail(email_id, "Account Activation", link);
     console.log(hashedPassword,pass);
     response.send({message:"account activation link is send to your mail id"});
+    }
+    else
+    {
+        response.send({message:"already same email_id exists"});
+    }
     
 });
 
