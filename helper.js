@@ -91,3 +91,9 @@ export async function countUrls(client, filter) {
     return results;
 }
 
+export async function updateCount(client,shortUrl) {
+    const result = await client.db("urlShortner").collection("urlStorage").update({ shortUrl:shortUrl},{ $inc: { ClickCount: 1 } });
+    console.log("successfully count updated", result);
+    return result;
+}
+

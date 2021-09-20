@@ -1,4 +1,4 @@
-import {  insertUser,getUser,updateUser,inserttoken,gettoken,deletetoken,inserttokens,gettokens,deletetokens,updateActiveStatus ,insertUrls,getUrls,listUrls, countUrls} from "../helper.js";
+import {  insertUser,getUser,updateUser,inserttoken,gettoken,deletetoken,inserttokens,gettokens,deletetokens,updateActiveStatus ,insertUrls,getUrls,listUrls, countUrls, updateCount} from "../helper.js";
 
 import {createConnection} from "../index.js";
 import express, { response }  from 'express';
@@ -23,8 +23,8 @@ router
     const isActive="false"
     const pass=await insertUser(client,{email_id:email_id,firstname:firstname,lastname:lastname,password:hashedPassword,Account_Active:isActive})
     const token=jwt.sign({email_id:email_id},process.env.REKEY);
-    const expiryDate= Date.now()+3600000;
-    const store= await inserttokens(client,{tokenid:email_id,token:token,expiryDate:expiryDate});
+    
+    const store= await inserttokens(client,{email_id:email_id,token:token});
     const link = `${process.env.BASE_URL}/account-activation/${email_id}/${token}`;
     const mail=  await sendEmail(email_id, "Account Activation", link);
     console.log(hashedPassword,pass);
@@ -40,20 +40,16 @@ router
     const email_id=request.params.email_id;
     const token=request.params.token;
     const client=await createConnection();
-    const tokens=await gettokens(client,{token:token});
-    if(!tokens){
+    const mytokens=await gettokens(client,{token:token});
+    if(!mytokens){
         response.send({message:"invalid token"})
     }else{
-        if( Date.now()< tokens.expiryDate ){
+       
         const updateStatus="true"
         const updateuserActiveStatus = await updateActiveStatus(client,email_id,updateStatus);
         const deletemytokens= await deletetokens(client,{token:token});
         response.send({message:"your account got activated"})
 
-    } 
-    else{
-        response.send({message:"link got expired,try to sign up again"})
-    }
 
 } 
   
@@ -92,7 +88,7 @@ else{
 });
 
 router
-.route("/forgetpassword")
+.route("/myforgetpassword")
 .post(async (request,response)=>{
     const { email_id }= request.body;
     const client=await createConnection();
@@ -143,12 +139,18 @@ router
 
 router.route("/urlshorter").post(async (request,response)=>{
     const {longUrl}=request.body;
+    const myShortUrl =  await  getUrls(client,{longUrl:longUrl});
+    if(myShortUrl){
+        response.send({message:"already shortened url for the given url exists"})
+    }
+    else{
     const shortUrl= await generateUrl();
     const count=0;
     const time= new Date();
     const client=await createConnection();
     const urlStoreage= await insertUrls(client,{longUrl:longUrl,shortUrl:shortUrl,timestamp:time,ClickCount:count});
-    response.send({shortUrl:shortUrl});
+    response.send({shortUrl:shortUrl} );
+    }
 
 });
 
@@ -174,14 +176,18 @@ router.route("/countUrl").get(async(request,response)=>{
           },
         },
       ])
-    response.send({message:"month wise count of number of url have been done",counts});
+    response.send(counts);
 });
 
-router.route("myUrl/:shortUrl").get(async(request,response)=>{
+router.route("/myUrl/:shortUrl").get(async(request,response)=>{
     const shortUrl= request.params.shortUrl;
     const client=  await createConnection();
+    
     const myShortUrl =  await  getUrls(client,{shortUrl:shortUrl});
-    response.send(myShortUrl);
+    const mylongUrl=myShortUrl.longUrl;
+    
+    const mycount = await updateCount(client,shortUrl);
+    response.send({mylongUrl:mylongUrl});
 });
 
 
