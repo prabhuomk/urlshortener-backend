@@ -139,6 +139,7 @@ router
 
 router.route("/urlshorter").post(async (request,response)=>{
     const {longUrl}=request.body;
+    const client=await createConnection();
     const myShortUrl =  await  getUrls(client,{longUrl:longUrl});
     if(myShortUrl){
         response.send({message:"already shortened url for the given url exists"})
