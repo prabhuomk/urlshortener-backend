@@ -20,7 +20,7 @@ router
     const { email_id,firstname,lastname,password }= request.body;
     const client=await createConnection();
     const myUser= await getUser(client,{email_id:email_id});
-    if(!myuser){
+    if(!myUser){
     const hashedPassword=await genPassword(password);
     const isActive="false"
     const pass=await insertUser(client,{email_id:email_id,firstname:firstname,lastname:lastname,password:hashedPassword,Account_Active:isActive})
